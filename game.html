@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <title>Matching Game</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=1">
+    <link href="//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.5/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet prefetch" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet prefetch" href="https://fonts.googleapis.com/css?family=Coda">
+    <link rel="stylesheet" href="css/game.css">
+</head>
+
+<body>
+
+<div class="container">
+    <header>
+        <h1>Matching Game</h1>
+        <section class="score-panel">
+
+            <ul class="stars">
+                <li><i class="fa fa-star"></i></li>
+                <li><i class="fa fa-star"></i></li>
+                <li><i class="fa fa-star"></i></li>
+            </ul>
+
+            <span class="moves">0</span> Moves
+            <div class="restart">
+                RESTART
+                <i class="fa fa-repeat"></i>
+            </div>
+
+            <div class="info">
+                INFORMATION
+                <i class="fa fa-info-circle"></i>
+            </div>
+
+            <span class="timer">
+                00:00:00
+            </span>
+        </section>
+    </header>
+
+    <div class="modal fade" id="end-game-modal" role="dialog" data-keyboard="false" data-backdrop="static">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 class="modal-title">Congratulations!</h2>
+                    <p class="modal-message">You won!</p>
+                </div>
+                <div class="modal-body">
+                    <div class="modal-element">
+                        <span>Time: </span>
+                    </div>
+                    <div class="modal-element">
+                        <span>Moves: </span>
+                    </div>
+                    <div class="modal-element">
+                        <span>Stars: </span>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button data-dismiss="modal" class="btn btn-default">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="choose-game-mode-modal" role="dialog" data-keyboard="false" data-backdrop="static">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form class="form-horizontal" method="post" id="choose_game_mode">
+                    <div class="modal-header">
+                        <h4 class="modal-title" id="coordinatesModal">Game Level</h4>
+                    </div>
+                    <div class="modal-body">
+                        Please, choose game level:
+                    </div>
+                    <div class="modal-footer">
+                        <button data-dismiss="modal" class="btn btn-default" id="beginner-choice">Beginner</button>
+                        <button data-dismiss="modal" class="btn btn-default" id="intermediate-choice">Intermediate</button>
+                        <button data-dismiss="modal" class="btn btn-default" id="advanced-choice">Advanced</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="information-modal" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 class="modal-title">How to play</h2>
+                </div>
+                <div class="modal-info-body">
+                    <p>To play this game simply click on one of the cards. This will flip the card
+                        and reveal the symbol that is underneath. After that you may click on another
+                        card to do the same thing. If the cards match they will stay open, if not they will both flip
+                        back down. The point of the game is to memorise where the different symbols lie and match them
+                        all as fast as posible with the least number of moves possible.</p>
+                </div>
+                <div class="modal-footer">
+                    <button data-dismiss="modal" class="btn btn-default">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+
+<script src="js/cards.js"></script>
+<script src="js/timer.js"></script>
+
+<script>
+    $('#choose-game-mode-modal').modal('show');
+    $('#choose-game-mode-modal .modal-footer button').on('click', function(event) {
+        var $button = $(event.target);
+
+        $(this).closest('.modal').one('hidden.bs.modal', function() {
+            startTheGame($button[0].id)
+        });
+    });
+
+    $('#end-game-modal .modal-footer button').on('click', function(event) {
+        location.reload();
+    });
+
+    // Click event to show information screen for the game
+    $('.info').click(function () {
+        $('#information-modal').modal('show');
+    });
+
+    // Click event to restart the game
+    $('.restart').click(function () {
+        location.reload();
+    });
+
+    function startTheGame(buttonId) {
+        var deck, classDeck;
+        var lowMargin, highMargin;
+
+        // HTML elements creation for deck and cards
+        if (buttonId === "beginner-choice") {
+            shuffleCards = shuffle(CardsBeginner);
+            deck = "deck-beginner";
+            classDeck = ".deck-beginner";
+            lowMargin = 10;
+            highMargin = 16;
+        } else if (buttonId === "intermediate-choice") {
+            shuffleCards = shuffle(CardsIntermediate);
+            deck = "deck-intermediate";
+            classDeck = ".deck-intermediate";
+            lowMargin = 16;
+            highMargin = 25;
+        } else if (buttonId === "advanced-choice") {
+            shuffleCards = shuffle(CardsAdvanced);
+            deck = "deck-advanced";
+            classDeck = ".deck-advanced";
+            lowMargin = 24;
+            highMargin = 38;
+        }
+
+        $('.container').append('<ul class="' + deck +  '"></ul>');
+
+        for (var i = 0; i < shuffleCards.length; i++) {
+            $(classDeck).prepend('<li class="card"></li>');
+        }
+        $('.card').prepend('<i></i>');
+
+        for (var i = 0; i < shuffleCards.length; i++) {
+            $('.card').eq(i).find('i').addClass(shuffleCards[i]);
+        }
+
+        //Event listener for flipping the cards when clicked on
+        $(classDeck).on('click', '.card', function (event) {
+            /*Start the timer when a card is clicked*/
+            startTime();
+            /*Essential condition for flipping a card i.e. a card may be flipped only if class='card' is present which is true always and only one other card is open.*/
+            if ($(this).attr('class') === 'card' && OpenCards.length < 2) {
+                /*CLass name of a open card is pushed to opencards array when only one card is opened.*/
+                if (OpenCards.length === 0) {
+                    $(this).toggleClass('open');
+                    OpenCards.push($(this).children().attr('class'));
+                }
+                /*If a card is open and next card is clicked */
+                else if (OpenCards.length === 1) {
+                    $(this).toggleClass('open');
+                    OpenCards.push($(this).children().attr('class'));
+                    /*Comparison of two open cards-If matched */
+                    if (OpenCards[0] === OpenCards[1]) {
+                        $('.card').filter($('.open')).toggleClass('open match');
+                        //Increment the number of tilees flipped and number of moves if a pair is made.
+                        tilesFlipped = tilesFlipped + 2;
+                        numOfmoves = numOfmoves + 1;
+                        $('.moves').text(numOfmoves);
+                        //Empty the array for comparison of next two cards.
+                        OpenCards = [];
+                    }
+                    else {
+                        // To avoid flipping of more than two cards at a time and used to flip back cards that are not matching
+                        function flipBack() {
+                            $('.card').filter($('.open')).toggleClass('open');
+                            OpenCards = [];
+                            numOfmoves = numOfmoves + 1;
+                            $('.moves').text(numOfmoves);
+                        }
+
+                        setTimeout(flipBack, 600);
+                    }
+                }
+
+                // Star rating
+                if (numOfmoves > lowMargin && numOfmoves < highMargin) {
+                    var star3 = $('.stars').find('li').eq(2);
+                    star3.css('color', 'black');
+                }
+                if (numOfmoves > highMargin) {
+                    var star2 = $('.stars').find('li').eq(1);
+                    star2.css('color', 'black');
+                }
+                // After all tiles are matched reload the game
+                if (tilesFlipped === shuffleCards.length) {
+                    stopTime();
+                    $('#end-game-modal').modal('show');
+                }
+            }
+        });
+    }
+</script>
+
+</body>
+</html>
